@@ -22,7 +22,7 @@ jobs:
       run: npm install
       
     - name: Run scraper
-      run: node scraper.js
+      run: node index.js
       
     - name: Check for changes
       id: check_changes
