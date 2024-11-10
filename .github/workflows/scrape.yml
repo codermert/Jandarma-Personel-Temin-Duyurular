@@ -1,0 +1,39 @@
+name: Jandarma Duyuru Takip
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Her 5 dakikada bir çalışır
+  workflow_dispatch:        # Manuel çalıştır
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Run scraper
+      run: node scraper.js
+      
+    - name: Check for changes
+      id: check_changes
+      run: |
+        git diff --quiet veri.json || echo "changes=true" >> $GITHUB_OUTPUT
+        
+    - name: Commit and push if changes
+      if: steps.check_changes.outputs.changes == 'true'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add veri.json
+        git commit -m "🤖 Duyurular güncellendi"
+        git push
